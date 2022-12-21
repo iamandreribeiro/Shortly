@@ -4,8 +4,28 @@ import { connectionDB } from "../database/db.js";
 import { v4 } from "uuid";
 
 export async function signIn(req, res) {
-    const token = v4();
-    res.status(200).send(token);
+  const {email} = req.body;  
+  const token = v4();
+  const date = dayjs().format("YYYY-MM-DD");
+
+    try {
+      const {rows} = await connectionDB.query(
+        `SELECT * FROM users WHERE email=$1;`,
+        [email]
+      );
+
+      const userId = rows[0].id;
+
+      await connectionDB.query(
+        `INSERT INTO sessions (token, "userId", "createdAt") VALUES ($1, $2, $3);`,
+        [token, userId, date]
+      );
+      
+      return res.status(200).send(token);
+      
+    } catch (error) {
+      return res.status(500).send(error.message);
+    }
 }
 
 export async function signUp(req, res) {
@@ -16,11 +36,12 @@ export async function signUp(req, res) {
 
   try {
     await connectionDB.query(
-      `INSERT INTO users (name, email, password, createdat) VALUES ($1, $2, $3, $4);`,
+      `INSERT INTO users (name, email, password, "createdAt") VALUES ($1, $2, $3, $4);`,
       [name, email, encryptedPassword, date]
     );
 
-    return res.status(201);
+    return res.sendStatus(201);
+
   } catch (error) {
     return res.status(500).send(error.message);
   }
