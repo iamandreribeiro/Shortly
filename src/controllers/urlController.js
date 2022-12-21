@@ -26,3 +26,18 @@ export async function urlPost(req, res) {
         return res.status(500).send(error.message);
     }
 }
+
+export async function getUrlById(req, res) {
+    const {id} = req.params;
+
+    try {
+        const {rows} = await connectionDB.query(
+          `SELECT * FROM urls WHERE id=$1`,
+          [id]
+        );
+
+        return res.status(200).send(rows[0]);
+      } catch (error){
+        return res.status(500).send(error.message);
+      }
+}
