@@ -46,3 +46,39 @@ export async function signUp(req, res) {
     return res.status(500).send(error.message);
   }
 }
+
+export async function getUsersLink(req, res) {
+  try {
+    const userId = res.locals.user.userId;
+
+    const {rows} = await connectionDB.query(
+      `SELECT * FROM urls WHERE "userId"=$1`,
+      [userId]
+    );
+    
+    let totalVisitors = 0;
+    let shortenedUrls = [];
+
+    rows.forEach((url) => {
+      totalVisitors += url.visitCount;
+
+      shortenedUrls.push({
+        id: url.id,
+			  shortUrl: url.shortenUrl,
+			  url: url.url,
+			  visitCount: url.visitCount
+      });
+    });
+
+
+    console.log({
+      id: 1,
+      name: "Teste",
+      visitCount: totalVisitors,
+      shortenedUrls
+    });
+
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
