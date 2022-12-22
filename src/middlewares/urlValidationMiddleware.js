@@ -38,3 +38,22 @@ export async function urlExist(req, res, next) {
 
   next();
 }
+
+export async function shortenUrlExist(req, res, next) {
+  const {shortUrl} = req.params;
+  
+  try {
+    const {rows} = await connectionDB.query(
+      `SELECT * FROM urls WHERE "shortenUrl"=$1`,
+      [shortUrl]
+    );
+
+    if(rows.length === 0) {
+      return res.sendStatus(404);
+    }
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+
+  next();
+}

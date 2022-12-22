@@ -41,3 +41,26 @@ export async function getUrlById(req, res) {
         return res.status(500).send(error.message);
       }
 }
+
+export async function getShortenUrlById(req, res) {
+    const {shortUrl} = req.params;
+
+    try {
+        const {rows} = await connectionDB.query(
+          `SELECT * FROM urls WHERE "shortenUrl"=$1`,
+          [shortUrl]
+        );
+    
+        const incVisits = rows[0].visitCount + 1;
+        const link = rows[0].url;
+
+        await connectionDB.query(
+            `UPDATE urls SET "visitCount"=$1 WHERE "shortenUrl"=$2`,
+            [incVisits, shortUrl]
+        );
+
+        res.redirect(link);
+      } catch (error) {
+        return res.status(500).send(error.message);
+      }
+}
