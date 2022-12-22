@@ -51,15 +51,17 @@ export async function getUsersLink(req, res) {
   try {
     const userId = res.locals.user.userId;
 
-    const {rows} = await connectionDB.query(
-      `SELECT * FROM urls WHERE "userId"=$1`,
+    const queryUser = await connectionDB.query(
+      `SELECT users.name, users.id, urls.* FROM users JOIN urls ON users.id = urls."userId" WHERE users.id=$1`,
       [userId]
     );
     
     let totalVisitors = 0;
     let shortenedUrls = [];
+    const name = queryUser.rows[0].name;
+    const id = queryUser.rows[0].id;
 
-    rows.forEach((url) => {
+    queryUser.rows.forEach((url) => {
       totalVisitors += url.visitCount;
 
       shortenedUrls.push({
@@ -71,13 +73,14 @@ export async function getUsersLink(req, res) {
     });
 
 
-    console.log({
-      id: 1,
-      name: "Teste",
+    const allUserLinks = {
+      id: id,
+      name: name,
       visitCount: totalVisitors,
       shortenedUrls
-    });
+    }
 
+    return res.status(200).send(allUserLinks);
   } catch (error) {
     return res.status(500).send(error.message);
   }
