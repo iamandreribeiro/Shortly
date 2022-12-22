@@ -57,3 +57,40 @@ export async function shortenUrlExist(req, res, next) {
 
   next();
 }
+
+export async function urlDeleteValidation(req, res, next) {
+  const {authorization} = req.headers;
+  const {id} = req.params;
+
+  if (!authorization || !validate(authorization)) {
+    return res.sendStatus(401);
+  }
+
+  try {
+    const urls = await connectionDB.query(
+      `SELECT * FROM urls WHERE id=$1`,
+      [id]
+    );
+
+    const sessions = await connectionDB.query(
+      `SELECT * FROM sessions WHERE token=$1`,
+      [authorization]
+    );
+
+    const userUrlId = urls.rows[0].userId;
+    const userSessionId = sessions.rows[0].userId;
+
+    if(urls.rows.length === 0) {
+      return res.sendStatus(404);
+    }
+
+    if(userSessionId !== userUrlId) {
+      return res.sendStatus(401);
+    }
+
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+  
+  next();
+}
