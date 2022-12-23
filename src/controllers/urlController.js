@@ -6,7 +6,7 @@ export async function urlPost(req, res) {
     const {url} = req.body;
     const { authorization } = req.headers;
     const shortenUrl = nanoid();
-    const date = dayjs().format("YYYY-MM-DD");
+    const date = dayjs().format("YYYY-MM-DD HH-mm");
 
     try {
         const {rows} = await connectionDB.query(

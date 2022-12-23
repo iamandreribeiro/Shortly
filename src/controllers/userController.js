@@ -6,7 +6,7 @@ import { v4 } from "uuid";
 export async function signIn(req, res) {
   const { email } = req.body;
   const token = v4();
-  const date = dayjs().format("YYYY-MM-DD");
+  const date = dayjs().format("YYYY-MM-DD HH-mm");
 
   try {
     const { rows } = await connectionDB.query(
@@ -32,7 +32,7 @@ export async function signUp(req, res) {
   const { name, email, password } = req.body;
 
   const encryptedPassword = bcrypt.hashSync(password, 10);
-  const date = dayjs().format("YYYY-MM-DD");
+  const date = dayjs().format("YYYY-MM-DD HH-mm");
 
   try {
     await connectionDB.query(
