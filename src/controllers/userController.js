@@ -4,28 +4,28 @@ import { connectionDB } from "../database/db.js";
 import { v4 } from "uuid";
 
 export async function signIn(req, res) {
-  const {email} = req.body;  
+  const { email } = req.body;
   const token = v4();
   const date = dayjs().format("YYYY-MM-DD");
 
-    try {
-      const {rows} = await connectionDB.query(
-        `SELECT * FROM users WHERE email=$1;`,
-        [email]
-      );
+  try {
+    const { rows } = await connectionDB.query(
+      `SELECT * FROM users WHERE email=$1;`,
+      [email]
+    );
 
-      const userId = rows[0].id;
+    const userId = rows[0].id;
 
-      await connectionDB.query(
-        `INSERT INTO sessions (token, "userId", "createdAt") VALUES ($1, $2, $3);`,
-        [token, userId, date]
-      );
-      
-      return res.status(200).send(token);
-      
-    } catch (error) {
-      return res.status(500).send(error.message);
-    }
+    await connectionDB.query(
+      `INSERT INTO sessions (token, "userId", "createdAt") VALUES ($1, $2, $3);`,
+      [token, userId, date]
+    );
+
+    return res.status(200).send(token);
+
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
 }
 
 export async function signUp(req, res) {
@@ -52,10 +52,14 @@ export async function getUsersLink(req, res) {
     const userId = res.locals.user.userId;
 
     const queryUser = await connectionDB.query(
-      `SELECT users.name, users.id, urls.* FROM users JOIN urls ON users.id = urls."userId" WHERE users.id=$1`,
+      `SELECT users.name, users.id, urls.* 
+      FROM users 
+      JOIN urls 
+      ON users.id = urls."userId" 
+      WHERE users.id=$1`,
       [userId]
     );
-    
+
     let totalVisitors = 0;
     let shortenedUrls = [];
     const name = queryUser.rows[0].name;
@@ -66,9 +70,9 @@ export async function getUsersLink(req, res) {
 
       shortenedUrls.push({
         id: url.id,
-			  shortUrl: url.shortenUrl,
-			  url: url.url,
-			  visitCount: url.visitCount
+        shortUrl: url.shortenUrl,
+        url: url.url,
+        visitCount: url.visitCount
       });
     });
 

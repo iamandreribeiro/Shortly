@@ -76,6 +76,26 @@ export async function deleteUrl(req, res) {
 
         return res.sendStatus(204);
     } catch (error) {
-        res.status(500).send(error.message);
+        return res.status(500).send(error.message);
     }
+}
+
+export async function generateRanking(req, res) {
+  try {
+    const queryUsers = await connectionDB.query(
+        `SELECT users.id, users.name,
+        COUNT(urls.*) AS "linksCount",
+        COALESCE(sum(urls."visitCount"),0) AS "visitCount"
+        FROM users 
+        LEFT JOIN urls 
+        ON users.id = urls."userId"
+        GROUP BY users.id
+        ORDER BY "visitCount" DESC
+        LIMIT 10`
+      );
+
+    return res.status(200).send(queryUsers.rows);
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
 }
