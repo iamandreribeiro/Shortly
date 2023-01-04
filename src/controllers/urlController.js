@@ -70,7 +70,7 @@ export async function deleteUrl(req, res) {
 
     try {
         await connectionDB.query(
-            `DELETE * FROM urls WHERE id=$1`,
+            `DELETE FROM urls WHERE id=$1`,
             [id]
         );
 
