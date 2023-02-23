@@ -62,7 +62,8 @@ export async function signUpValidation(req, res, next) {
 
 export async function usersValidation(req, res, next) {
   const {authorization} = req.headers;
-
+  const token = authorization?.replace("Bearer ", "");
+  
   if(!authorization || validate(authorization) === false) {
     return res.sendStatus(401);
   }
@@ -70,7 +71,7 @@ export async function usersValidation(req, res, next) {
   try {
     const {rows} = await connectionDB.query(
       `SELECT * FROM sessions WHERE token=$1;`,
-      [authorization]       
+      [token]       
     );
 
     if(rows[0].length === 0) { 
